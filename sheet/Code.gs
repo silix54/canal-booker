@@ -285,6 +285,8 @@ function sameRoom_(a, b) {
 }
 
 function parseDateKey_(value) {
+  // The sheet turns "2026-10-14" into a date, so the For date column usually holds a Date.
+  if (value instanceof Date && !isNaN(value)) return Utilities.formatDate(value, TZ, 'EEE').slice(0, 3).toLowerCase();
   var s = String(value || '').trim();
   var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return '';
@@ -393,6 +395,7 @@ function refreshAnalytics() {
     ['Worst time', counts[0].worst_time, counts[1].worst_time, counts[2].worst_time]
   ]);
   sh.getRange(14, 1, 2, 4).setFontWeight('normal');
+  sh.getRange(14, 2, 2, 3).setNumberFormat('0.0 "s"');
 }
 
 /** The booker posts results here as JSON. */
@@ -421,7 +424,7 @@ function doPost(e) {
   }
   if (/^Booked/.test(clean_(d.result))) {
     try { refreshBookings(); } catch (err) { /* the page catches up at the nightly refresh */ }
-    try { refreshAnalytics(); } catch (err) { /* do nothing }
+    try { refreshAnalytics(); } catch (err) { /* the tab catches up at the nightly refresh */ }
   }
   return reply_('ok');
 }
